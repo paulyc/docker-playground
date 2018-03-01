@@ -41,8 +41,9 @@ RUN	cd osmo-sgsn && \
 VOLUME	/data
 
 COPY	osmo-sgsn.cfg /data/osmo-sgsn.cfg
+COPY	Makefile.within-docker-img /Makefile
 
-WORKDIR	/data
-CMD	["/usr/local/bin/osmo-sgsn"]
+WORKDIR	/
+CMD	["make", "run"]
 
 EXPOSE	23000/udp 4245/tcp 4249/tcp

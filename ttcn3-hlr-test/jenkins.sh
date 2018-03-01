@@ -8,6 +8,18 @@ docker_images_require \
 	"debian-stretch-titan" \
 	"ttcn3-hlr-test"
 
+ADD_TTCN_RUN_OPTS=""
+ADD_TTCN_RUN_CMD=""
+ADD_TTCN_VOLUMES=""
+
+if [ "x$1" = "x-h" ]; then
+	ADD_TTCN_RUN_OPTS="-ti"
+	ADD_TTCN_RUN_CMD="bash"
+	if [ -d "$2" ]; then
+		ADD_TTCN_VOLUMES="$ADD_TTCN_VOLUMES -v $2:/osmo-ttcn3-hacks"
+	fi
+fi
+
 network_create 172.18.10.0/24
 
 mkdir $VOL_BASE_DIR/hlr-tester
@@ -29,8 +41,11 @@ docker run	--rm \
 		--network $NET_NAME --ip 172.18.10.103 \
 		-e "TTCN3_PCAP_PATH=/data" \
 		-v $VOL_BASE_DIR/hlr-tester:/data \
+		$ADD_TTCN_VOLUMES \
 		--name ${BUILD_TAG}-ttcn3-hlr-test \
-		$REPO_USER/ttcn3-hlr-test
+		$ADD_TTCN_RUN_OPTS \
+		$REPO_USER/ttcn3-hlr-test \
+		$ADD_TTCN_RUN_CMD
 
 echo Stopping containers
 docker container kill ${BUILD_TAG}-hlr

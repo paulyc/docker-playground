@@ -40,8 +40,9 @@ RUN	cd osmo-bsc && \
 VOLUME	/data
 
 COPY	osmo-bsc.cfg /data/osmo-bsc.cfg
+COPY	Makefile.within-docker-img /Makefile
 
-WORKDIR	/data
-CMD	["/usr/local/bin/osmo-bsc"]
+WORKDIR	/
+CMD	["make", "run"]
 
 #EXPOSE	

@@ -11,6 +11,26 @@ docker_images_require \
 
 network_create 172.18.1.0/24
 
+ADD_TTCN_RUN_OPTS=""
+ADD_TTCN_RUN_CMD=""
+ADD_TTCN_VOLUMES=""
+ADD_MSC_VOLUMES=""
+ADD_MSC_RUN_OPTS=""
+MSC_RUN_CMD="osmo-msc"
+
+if [ "x$1" = "x-h" ]; then
+	ADD_TTCN_RUN_OPTS="-ti"
+	ADD_TTCN_RUN_CMD="bash"
+	if [ -d "$2" ]; then
+		ADD_TTCN_VOLUMES="$ADD_TTCN_VOLUMES -v $2:/osmo-ttcn3-hacks"
+	fi
+	if [ -d "$3" ]; then
+		ADD_MSC_VOLUMES="$ADD_MSC_VOLUMES -v $3:/src"
+		MSC_RUN_CMD="sleep 9999999"
+		ADD_MSC_RUN_OPTS="--privileged"
+	fi
+fi
+
 mkdir $VOL_BASE_DIR/msc-tester
 mkdir $VOL_BASE_DIR/msc-tester/unix
 cp MSC_Tests.cfg $VOL_BASE_DIR/msc-tester/
@@ -36,9 +56,11 @@ docker run	--rm \
 		--network $NET_NAME --ip 172.18.1.10 \
 		-v $VOL_BASE_DIR/msc:/data \
 		-v $VOL_BASE_DIR/unix:/data/unix \
+		$ADD_MSC_VOLUMES \
 		--name ${BUILD_TAG}-msc -d \
+		$ADD_MSC_RUN_OPTS \
 		$REPO_USER/osmo-msc-$IMAGE_SUFFIX \
-		osmo-msc
+		$MSC_RUN_CMD
 
 echo Starting container with MSC testsuite
 docker run	--rm \
@@ -46,8 +68,11 @@ docker run	--rm \
 		-e "TTCN3_PCAP_PATH=/data" \
 		-v $VOL_BASE_DIR/msc-tester:/data \
 		-v $VOL_BASE_DIR/unix:/data/unix \
+		$ADD_TTCN_VOLUMES \
 		--name ${BUILD_TAG}-ttcn3-msc-test \
-		$REPO_USER/ttcn3-msc-test
+		$ADD_TTCN_RUN_OPTS \
+		$REPO_USER/ttcn3-msc-test \
+		$ADD_TTCN_RUN_CMD
 result="$?"
 
 echo Stopping containers

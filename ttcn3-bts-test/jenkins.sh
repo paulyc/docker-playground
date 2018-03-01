@@ -11,6 +11,26 @@ docker_images_require \
 	"debian-stretch-titan" \
 	"ttcn3-bts-test"
 
+ADD_TTCN_RUN_OPTS=""
+ADD_TTCN_RUN_CMD=""
+ADD_TTCN_VOLUMES=""
+BTS_RUN_CMD="/usr/local/bin/respawn.sh osmo-bts-trx -c /data/osmo-bts.cfg -i 172.18.9.10"
+ADD_BTS_VOLUMES=""
+ADD_BTS_RUN_OPTS=""
+
+if [ "x$1" = "x-h" ]; then
+	ADD_TTCN_RUN_OPTS="-ti"
+	ADD_TTCN_RUN_CMD="bash"
+	if [ -d "$2" ]; then
+		ADD_TTCN_VOLUMES="$ADD_TTCN_VOLUMES -v $2:/osmo-ttcn3-hacks"
+	fi
+	if [ -d "$3" ]; then
+		BTS_RUN_CMD="sleep 9999999"
+		ADD_BTS_VOLUMES="$ADD_BTS_VOLUMES -v $3:/src"
+		ADD_BTS_RUN_OPTS="--privileged"
+	fi
+fi
+
 network_create 172.18.9.0/24
 
 mkdir $VOL_BASE_DIR/bts-tester
@@ -41,9 +61,11 @@ docker run	--rm \
 		--network $NET_NAME --ip 172.18.9.20 \
 		-v $VOL_BASE_DIR/bts:/data \
 		-v $VOL_BASE_DIR/unix:/data/unix \
+		$ADD_BTS_VOLUMES \
 		--name ${BUILD_TAG}-bts -d \
+		$ADD_BTS_RUN_OPTS \
 		$REPO_USER/osmo-bts-$IMAGE_SUFFIX \
-		/usr/local/bin/respawn.sh osmo-bts-trx -c /data/osmo-bts.cfg -i 172.18.9.10
+		$BTS_RUN_CMD
 
 echo Starting container with fake_trx
 docker run	--rm \
@@ -72,8 +94,11 @@ docker run	--rm \
 		-e "TTCN3_PCAP_PATH=/data" \
 		-v $VOL_BASE_DIR/bts-tester:/data \
 		-v $VOL_BASE_DIR/unix:/data/unix \
+		$ADD_TTCN_VOLUMES \
 		--name ${BUILD_TAG}-ttcn3-bts-test \
-		$REPO_USER/ttcn3-bts-test
+		$ADD_TTCN_RUN_OPTS \
+		$REPO_USER/ttcn3-bts-test \
+		$ADD_TTCN_RUN_CMD
 
 echo Stopping containers
 docker container kill ${BUILD_TAG}-trxcon
