@@ -22,6 +22,7 @@ RUN	apt-get update && \
 		g++ \
 		gawk \
 		gcc \
+		gdb \
 		git \
 		git-buildpackage \
 		libc-ares-dev \
@@ -47,5 +48,6 @@ RUN	apt-get update && \
 		make \
 		pkg-config \
 		sqlite3 \
+		vim \
 		wget && \
 	apt-get clean
