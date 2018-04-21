@@ -11,6 +11,7 @@ RUN	apt-key add /tmp/Release.key && \
 	rm /tmp/Release.key && \
 	echo "deb " $OSMOCOM_REPO " ./" > /etc/apt/sources.list.d/osmocom-nightly.list
 
+# (dependency libcdk5 is for meas_vis, used by the meas_feed docker image)
 ADD	$OSMOCOM_REPO/Release /tmp/Release
 RUN	apt-get update && \
 	apt-get install -y --no-install-recommends \
@@ -20,8 +21,9 @@ RUN	apt-get update && \
 		libosmo-netif-dev \
 		libosmo-sccp-dev \
 		libsmpp34-dev \
-		libgtp-dev && \
-	apt-get clean
+		libgtp-dev \
+		libcdk5-dev \
+	&& apt-get clean
 
 WORKDIR	/tmp
 
