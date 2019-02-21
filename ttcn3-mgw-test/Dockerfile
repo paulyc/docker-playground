@@ -8,7 +8,7 @@ RUN	cd osmo-ttcn3-hacks && \
 	git checkout -f -B master origin/master && \
 	make deps
 
-ARG	OSMO_TTCN3_BRANCH="master"
+ARG	OSMO_TTCN3_BRANCH="pmaier/hrmangle2"
 
 ADD	http://git.osmocom.org/osmo-ttcn3-hacks/patch?h=$OSMO_TTCN3_BRANCH /tmp/commit
 RUN	cd osmo-ttcn3-hacks && \
