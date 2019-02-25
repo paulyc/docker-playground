@@ -26,7 +26,7 @@ RUN	apt-get update && \
 
 WORKDIR	/tmp
 
-ARG	OSMO_BSC_BRANCH="master"
+ARG	OSMO_BSC_BRANCH="pmaier/challoc2"
 
 RUN	git clone git://git.osmocom.org/osmo-bsc.git
 ADD	http://git.osmocom.org/osmo-bsc/patch?h=$OSMO_BSC_BRANCH /tmp/commit-osmo-bsc
